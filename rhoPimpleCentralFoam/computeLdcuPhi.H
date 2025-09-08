@@ -93,6 +93,10 @@ auto finite = [](const scalar x) -> bool { return std::isfinite(double(x)); };
 scalarField& phiInt = phiLDCU.primitiveFieldRef();
 
 const label nIntFaces = owner.size();
+label nFallback = 0, nNearChar = 0, nClamped = 0, nNonFinite = 0;
+// Start-up ramp for corrections to avoid shocks at t=0 (first ~200 time steps)
+const scalar ldcuRamp = min(scalar(1), scalar(runTime.timeIndex())/scalar(200));
+scalar minRhoStarDiag = GREAT, minPStarDiag = GREAT;
 vectorField& UstarInt = UstarF.primitiveFieldRef();
 for (label faceI = 0; faceI < nIntFaces; ++faceI)
 {
@@ -130,6 +134,7 @@ for (label faceI = 0; faceI < nIntFaces; ++faceI)
         const scalar fR = rhoR*unR;
         phiInt[faceI] = 0.5*(fL + fR) * sArea;
         // Keep default zeros for corrections and initial interpolated Ustar
+        ++nFallback;
         continue;
     }
 
@@ -149,108 +154,164 @@ for (label faceI = 0; faceI < nIntFaces; ++faceI)
     else
     {
         // Central-upwind baseline flux (Kurganov-Tadmor type)
-        F = (sR*FL - sL*FR + sR*sL*(rhoR - rhoL)) / (denom + VSMALL);
+        const scalar Fbase = (sR*FL - sL*FR + sR*sL*(rhoR - rhoL)) / (denom + VSMALL);
+        F = Fbase;
 
-        // Low-dissipation correction from LDCU (Part II) — density component
         // Star states (1D-normal) based on local wave speeds
         const scalar rhouL = rhoL*unL;
         const scalar rhouR = rhoR*unR;
 
     const scalar denomV = (denom + VSMALL);
-    const scalar rhoStar = (sR*rhoL - sL*rhoR - (rhouL - rhouR)) / denomV;
+        const scalar rhoStar = (sR*rhoL - sL*rhoR - (rhouL - rhouR)) / denomV;
 
-    // Momentum star (vector) using full vector flux in n-direction
-    const vector FmomL = rhoL*UL*unL + pL*nHat;
-    const vector FmomR = rhoR*UR*unR + pR*nHat;
-    const vector rhouStarVec = (sR*(rhoL*UL) - sL*(rhoR*UR) - (FmomL - FmomR)) / denomV;
-    const scalar rhouStar = rhouStarVec & nHat; // normal component for 1D relations
-    const vector Ustar = rhouStarVec / max(rhoStar, VSMALL);
-    const scalar uStar = Ustar & nHat;
-
-        const scalar alphaStar = (uStar < 0)
-            ? sR/(sR - uStar + VSMALL)
-            : sL/(sL - uStar + VSMALL);
-
-    const scalar qRho = minmod
-    (
-        (uStar - sL)*(rhoStar - rhoR),
-        (sR - uStar)*(rhoL - rhoStar)
-    );
-
-    const scalar mCorr = alphaStar*qRho; // per unit area [kg/(m^2 s)]
-    F += mCorr;
-
-        // Store correction flux and star velocity for later momentum/energy fixes
-        const scalar phiCorrInt = mCorr * sArea; // integrated
-        phiCorr.primitiveFieldRef()[faceI] = phiCorrInt;
-        UstarInt[faceI] = Ustar;
+        // Momentum star (vector) using full vector flux in n-direction
+        const vector FmomL = rhoL*UL*unL + pL*nHat;
+        const vector FmomR = rhoR*UR*unR + pR*nHat;
+        const vector rhouStarVec = (sR*(rhoL*UL) - sL*(rhoR*UR) - (FmomL - FmomR)) / denomV;
+        vector Ustar = rhouStarVec / max(rhoStar, VSMALL);
+        const scalar uStar = Ustar & nHat;
 
         // Build orthonormal tangential basis (t1,t2)
         vector t1 = vector(0, -nHat.z(), nHat.y());
-        if (mag(t1) < SMALL)
-        {
-            t1 = vector(-nHat.z(), 0, nHat.x());
-        }
+        if (mag(t1) < SMALL) { t1 = vector(-nHat.z(), 0, nHat.x()); }
         if (mag(t1) > VSMALL) t1 /= mag(t1);
-        vector t2 = nHat ^ t1; // guaranteed orthogonal
+        vector t2 = nHat ^ t1; // orthogonal
 
-        // Project velocities on tangents
-        const scalar vL1 = (UL & t1); const scalar vR1 = (UR & t1);
-        const scalar vL2 = (UL & t2); const scalar vR2 = (UR & t2);
+        // Tangential momenta
+        const scalar vL1 = (UL & t1), vR1 = (UR & t1);
+        const scalar vL2 = (UL & t2), vR2 = (UR & t2);
+        const scalar mL1 = rhoL*vL1, mR1 = rhoR*vR1;
+        const scalar mL2 = rhoL*vL2, mR2 = rhoR*vR2;
+        const scalar mStar1 = rhouStarVec & t1;
+        const scalar mStar2 = rhouStarVec & t2;
 
-        // Star states for rho*v (no pressure in flux), 1: t1, 2: t2
-        const scalar rhovL1 = rhoL*vL1; const scalar rhovR1 = rhoR*vR1;
-        const scalar rhovL2 = rhoL*vL2; const scalar rhovR2 = rhoR*vR2;
-
-        const scalar rhovStar1 = (sR*rhovL1 - sL*rhovR1 - (rhovL1*unL - rhovR1*unR)) / denom;
-        const scalar rhovStar2 = (sR*rhovL2 - sL*rhovR2 - (rhovL2*unL - rhovR2*unR)) / denom;
-
-        const scalar vStar1 = rhovStar1 / max(rhoStar, VSMALL);
-        const scalar vStar2 = rhovStar2 / max(rhoStar, VSMALL);
+        // Energy star (perfect gas)
+        const scalar gammaFace = 0.5*(gammaL + gammaR);
+        const scalar EL = pL/(gammaFace - 1.0) + 0.5*rhoL*(UL & UL);
+        const scalar ER = pR/(gammaFace - 1.0) + 0.5*rhoR*(UR & UR);
+        const scalar f4L = unL*(EL + pL);
+        const scalar f4R = unR*(ER + pR);
+        const scalar EStar = (sR*EL - sL*ER - (f4R - f4L)) / denomV;
+        const scalar pStar = (gammaFace - 1.0) * (EStar - 0.5*magSqr(rhouStarVec)/max(rhoStar, VSMALL));
+        minRhoStarDiag = min(minRhoStarDiag, rhoStar);
+        minPStarDiag = min(minPStarDiag, pStar);
+        const scalar dp = max(pStar - 1e-13, 0.0);
 
         // a*^+ = sR - u*, a*^- = sL - u*
-        const scalar apStar = sR - uStar;
-        const scalar amStar = sL - uStar;
+        const scalar ap1 = sR - uStar;
+        const scalar am1 = sL - uStar;
 
-        const scalar qRhov1 = minmod((uStar - sL)*(rhovStar1 - rhovR1), (sR - uStar)*(rhovL1 - rhovStar1));
-        const scalar qRhov2 = minmod((uStar - sL)*(rhovStar2 - rhovR2), (sR - uStar)*(rhovL2 - rhovStar2));
+        // Density/tangential corrections with limiter
+        scalar drho = minmod(-am1*(rhoL - rhoStar), ap1*(rhoStar - rhoR));
+        scalar dm1 = minmod(-am1*(mL1 - mStar1), ap1*(mStar1 - mR1));
+        scalar dm2 = minmod(-am1*(mL2 - mStar2), ap1*(mStar2 - mR2));
 
-        // Desired tangential correction flux (integrated)
-        vector tangCorr = (alphaStar*qRhov1*sArea)*t1 + (alphaStar*qRhov2*sArea)*t2;
+        const scalar rhoLmod = am1*rhoStar - drho;
+        const scalar rhoRmod = ap1*rhoStar - drho;
+        const scalar vStar1 = Ustar & t1;
+        const scalar vStar2 = Ustar & t2;
+        const scalar dmmax =
+            (dp > VSMALL && rhoStar > VSMALL)
+          ? Foam::sqrt(max(0.0, -2.0*rhoLmod*rhoRmod*dp/(rhoStar*(gammaFace-1.0))))
+          : 0.0;
+        if (dmmax > 0)
+        {
+            const scalar diff1 = dm1 - vStar1*drho;
+            if (mag(diff1) > dmmax) dm1 = vStar1*drho + std::copysign(dmmax, diff1);
+            const scalar diff2 = dm2 - vStar2*drho;
+            if (mag(diff2) > dmmax) dm2 = vStar2*drho + std::copysign(dmmax, diff2);
+        }
 
-        // Part already accounted by phiCorr * U*_tangential
+        // Energy correction (sum over tangential components)
+        scalar dE = 0.0;
+        dE += 0.5*
+            ((sqr(mStar1 - dm1/(ap1 + VSMALL)) / max(rhoStar - drho/(ap1 + VSMALL), VSMALL)
+             - sqr(mStar1 - dm1/(am1 + VSMALL)) / max(rhoStar - drho/(am1 + VSMALL), VSMALL))
+            ) / (denom + VSMALL);
+        dE += 0.5*
+            ((sqr(mStar2 - dm2/(ap1 + VSMALL)) / max(rhoStar - drho/(ap1 + VSMALL), VSMALL)
+             - sqr(mStar2 - dm2/(am1 + VSMALL)) / max(rhoStar - drho/(am1 + VSMALL), VSMALL))
+            ) / (denom + VSMALL);
+
+        // Scale as in reference (guard against near-characteristic speeds)
+        const bool pos = (uStar > 0);
+        const scalar waveTol = 1e-8*max(mag(sR), mag(sL)) + VSMALL;
+        if (mag(ap1) < waveTol || mag(am1) < waveTol)
+        {
+            drho = 0; dm1 = 0; dm2 = 0; dE = 0;
+            ++nNearChar;
+        }
+        else
+        {
+            scalar scaleR = pos ? (sL/(am1)) : (sR/(ap1));
+            const scalar scaleE = pos ? (sL*ap1) : (sR*am1);
+            // Clamp scale to avoid excessive amplification
+            const scalar scaleCap = 2.0;
+            scaleR = Foam::max(Foam::min(scaleR, scaleCap), -scaleCap);
+            drho *= scaleR;
+            dm1  *= scaleR;
+            dm2  *= scaleR;
+            dE   *= scaleE;
+        }
+
+        // Zero if u* exceeds wave speeds
+        if (mag(uStar) >= max(sR, -sL)) { drho = 0; dm1 = 0; dm2 = 0; dE = 0; }
+
+        // Cap mass correction vs baseline flux magnitude
+        const scalar cap = 0.25*(mag(Fbase) + SMALL);
+        if (mag(drho) > cap)
+        {
+            drho = copysign(cap, drho);
+            ++nClamped;
+        }
+
+        // Add kinetic contribution
+        dE += 0.5*sqr(uStar)*drho;
+        // Apply start-up ramp to all corrections
+        drho *= ldcuRamp;
+        dm1  *= ldcuRamp;
+        dm2  *= ldcuRamp;
+        dE   *= ldcuRamp;
+
+        // Ensure finite values; otherwise zero the corrections
+        if (!finite(drho)) { drho = 0.0; ++nNonFinite; }
+        if (!finite(dm1)) dm1 = 0.0;
+        if (!finite(dm2)) dm2 = 0.0;
+        if (!finite(dE))  { dE  = 0.0; ++nNonFinite; }
+        if (!finite(uStar)) { Ustar = (UL+UR)/2.0; }
+
+        // Corrected mass flux per unit area
+        F -= drho;
+
+        // Store integrated corrections for momentum/energy equations
+        const scalar phiCorrInt = drho * sArea; // integrated mass correction
+        phiCorr.primitiveFieldRef()[faceI] = phiCorrInt;
+        UstarInt[faceI] = Ustar;
+
+        // Tangential momentum corrections: split accounted vs extra
+        const vector tangCorr = (dm1*sArea)*t1 + (dm2*sArea)*t2;
         const vector UstarTang = Ustar - uStar*nHat;
-        vector accounted = phiCorrInt * UstarTang;
-
+        const vector accounted = phiCorrInt * UstarTang;
         const vector momExtra = tangCorr - accounted;
-        momCorrExtra.primitiveFieldRef()[faceI] = momExtra;
+        momCorrExtra.primitiveFieldRef()[faceI] =
+            vector
+            (
+                finite(momExtra.x()) ? momExtra.x() : 0.0,
+                finite(momExtra.y()) ? momExtra.y() : 0.0,
+                finite(momExtra.z()) ? momExtra.z() : 0.0
+            );
 
-        // Exact qE from Part II (2D/3D tangential contributions)
-        const scalar rhoPlus1 = max(rhoStar + qRho/(apStar + VSMALL), VSMALL);
-        const scalar rhoMinus1 = max(rhoStar + qRho/(amStar + VSMALL), VSMALL);
-        const scalar rhovPlus1 = rhovStar1 + qRhov1/(apStar + VSMALL);
-        const scalar rhovMinus1 = rhovStar1 + qRhov1/(amStar + VSMALL);
-
-        const scalar rhoPlus2 = max(rhoStar + qRho/(apStar + VSMALL), VSMALL);
-        const scalar rhoMinus2 = max(rhoStar + qRho/(amStar + VSMALL), VSMALL);
-        const scalar rhovPlus2 = rhovStar2 + qRhov2/(apStar + VSMALL);
-        const scalar rhovMinus2 = rhovStar2 + qRhov2/(amStar + VSMALL);
-
-        const scalar tangEnergyDiff = 0.5*
-        (
-            sqr(rhovPlus1)/rhoPlus1 - sqr(rhovMinus1)/rhoMinus1
-          + sqr(rhovPlus2)/rhoPlus2 - sqr(rhovMinus2)/rhoMinus2
-        );
-
-        const scalar qE = (apStar*amStar)/(denom) * tangEnergyDiff
-                         + 0.5*sqr(uStar)*qRho;
-
-        eCorr.primitiveFieldRef()[faceI] = alphaStar*qE*sArea;
+        // Energy correction integrated
+        {
+            const scalar eInt = dE*sArea;
+            eCorr.primitiveFieldRef()[faceI] = finite(eInt) ? eInt : 0.0;
+        }
     }
 
     // Convert to integrated flux (kg/s) with final safety
     const scalar Fint = F * sArea;
-    phiInt[faceI] = finite(Fint) ? Fint : phi.primitiveField()[faceI];
+    if (!finite(Fint)) { phiInt[faceI] = 0.5*(FL + FR)*sArea; ++nNonFinite; }
+    else { phiInt[faceI] = Fint; }
 }
 
 // For boundaries, fall back to the existing mass flux
@@ -262,4 +323,15 @@ forAll(phiLDCU.boundaryField(), patchI)
     UstarF.boundaryFieldRef()[patchI] = fvc::interpolate(U)().boundaryField()[patchI];
     momCorrExtra.boundaryFieldRef()[patchI] = vector::zero;
     eCorr.boundaryFieldRef()[patchI] = 0.0;
+}
+
+// Diagnostics (first few timesteps) – print if any events occurred
+if (nFallback || nNearChar || nClamped || nNonFinite)
+{
+    Info<< "LDCU diagnostics: fallback=" << nFallback
+        << " nearChar=" << nNearChar
+        << " clamped=" << nClamped
+        << " nonFinite=" << nNonFinite
+        << " min(rhoStar)=" << minRhoStarDiag
+        << " min(pStar)=" << minPStarDiag << nl;
 }
