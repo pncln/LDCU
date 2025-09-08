@@ -1,0 +1,14 @@
+SOURCE = \
+kOmegaSSTLdcu.C \
+kEpsilonLdcu.C \
+realizableKELdcu.C \
+SpalartAllmarasLdcu.C \
+kEqnLesLdcu.C \
+dynamicKEqnLdcu.C \
+SmagorinskyLdcu.C \
+WALELdcu.C \
+sigmaLdcu.C \
+registerLdcuModels.C \
+ensureLoaded.C \
+
+# sources

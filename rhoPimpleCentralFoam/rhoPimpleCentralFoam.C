@@ -55,10 +55,7 @@ Note
 #include "localEulerDdtScheme.H"
 #include "fvcSmooth.H"
 #include "ldcuTurbulenceLib.H"
-
-// Proactively dlopen the custom turbulence library as an extra safeguard
-#define FOAM_DLOPEN_LIBS "libldcuTurbulence"
-#include "foamDlOpenLibs.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,6 +76,7 @@ int main(int argc, char *argv[])
     // Ensure custom LDCU turbulence library is linked/loaded early
     // (static initializers will register the models)
     ldcuTurbulenceEnsureLoaded();
+    Foam::dlOpen({ "libldcuTurbulence" }, false); // also dlopen explicitly
     #include "createDynamicFvMesh.H"
     #include "createDyMControls.H"
     #include "initContinuityErrs.H"

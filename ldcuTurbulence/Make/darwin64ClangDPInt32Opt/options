@@ -1,0 +1,15 @@
+# 1 "Make/options"
+# 1 "<built-in>" 1
+# 1 "<built-in>" 3
+# 464 "<built-in>" 3
+# 1 "<command line>" 1
+# 1 "<built-in>" 2
+# 1 "Make/options" 2
+EXE_INC = -I$(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude -I$(WM_PROJECT_DIR)/src/TurbulenceModels/transportModels/lnInclude -I$(WM_PROJECT_DIR)/src/TurbulenceModels/compressible/lnInclude -I$(WM_PROJECT_DIR)/src/transportModels/compressible/lnInclude -I$(WM_PROJECT_DIR)/src/thermophysicalModels/basic/lnInclude -I$(WM_PROJECT_DIR)/src/finiteVolume/lnInclude -I$(WM_PROJECT_DIR)/src/meshTools/lnInclude -I$(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude -I$(WM_PROJECT_DIR)/src/OSspecific/POSIX/lnInclude
+
+
+# 12 "Make/options"
+EXE_LIBS = -lfiniteVolume -lmeshTools -lturbulenceModels -lcompressibleTurbulenceModels -lthermoTools -lOpenFOAM
+
+
+# options
