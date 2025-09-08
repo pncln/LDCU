@@ -1,0 +1,27 @@
+#!/bin/sh
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# Build local LDCU turbulence library
+cd "$ROOT_DIR/ldcuTurbulence" || exit 1
+# Load OpenFOAM v2406 environment if not already loaded
+if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
+    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
+    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    fi
+fi
+/Volumes/OpenFOAM-v2406/wmake/wmake libso
+
+# Build local rhoPimpleCentralFoam
+cd "$ROOT_DIR/rhoPimpleCentralFoam" || exit 1
+# Ensure local bin exists
+# Load OpenFOAM v2406 environment if not already loaded
+if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
+    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
+    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    fi
+fi
+# Compile
+/Volumes/OpenFOAM-v2406/wmake/wmake

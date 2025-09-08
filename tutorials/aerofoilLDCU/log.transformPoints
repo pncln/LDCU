@@ -1,0 +1,35 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
+Arch   : "LSB;label=32;scalar=64"
+Exec   : transformPoints -scale (1 0 1)
+Date   : Sep 09 2025
+Time   : 00:25:47
+Host   : Emils-MacBook-Pro.local
+PID    : 3791
+I/O    : uncollated
+Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+--> FOAM Warning : 
+    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
+    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
+    Could not load "libldcuTurbulence"
+dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
+Scaling points by (1 0 1)
+Writing points into directory "constant/polyMesh"
+
+
+End
+

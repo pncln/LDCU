@@ -1,0 +1,18 @@
+EXE_INC = \
+    -I$(WM_PROJECT_DIR)/src/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/TurbulenceModels/transportModels/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/TurbulenceModels/compressible/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/transportModels/compressible/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/thermophysicalModels/basic/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/finiteVolume/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/meshTools/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/OpenFOAM/lnInclude \
+    -I$(WM_PROJECT_DIR)/src/OSspecific/POSIX/lnInclude
+
+EXE_LIBS = \
+    -lfiniteVolume \
+    -lmeshTools \
+    -lturbulenceModels \
+    -lcompressibleTurbulenceModels \
+    -lthermoTools \
+    -lOpenFOAM

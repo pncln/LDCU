@@ -1,0 +1,106 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
+Arch   : "LSB;label=32;scalar=64"
+Exec   : blockMesh
+Date   : Sep 09 2025
+Time   : 00:25:43
+Host   : Emils-MacBook-Pro.local
+PID    : 3790
+I/O    : uncollated
+Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+--> FOAM Warning : 
+    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
+    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
+    Could not load "libldcuTurbulence"
+dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
+Creating block mesh from "system/blockMeshDict"
+Creating block edges
+No non-planar block faces defined
+Creating topology blocks
+
+Creating topology patches - from boundary section
+
+Creating block mesh topology
+
+Check topology
+
+	Basic statistics
+		Number of internal faces : 6
+		Number of boundary faces : 24
+		Number of defined boundary faces : 24
+		Number of undefined boundary faces : 0
+	Checking patch -> block consistency
+
+Creating block offsets
+Creating merge list (topological search)...
+
+Creating polyMesh from blockMesh
+Creating points with scale (1 1 1)
+    Block 0 cell size :
+        i : 0.021083319 .. 0.0042027547
+        j : 0.2 .. 0.2
+        k : 0.0022667051 .. 0.090668205
+
+    Block 1 cell size :
+        i : 0.023435647 .. 0.023435645
+        j : 0.2 .. 0.2
+        k : 0.0023368179 .. 0.093472715
+
+    Block 2 cell size :
+        i : 0.018989548 .. 0.18989548
+        j : 0.2 .. 0.2
+        k : 0.0023368179 .. 0.093472715
+
+    Block 3 cell size :
+        i : 0.021083319 .. 0.0042027547
+        j : 0.2 .. 0.2
+        k : 0.0022667051 .. 0.090668205
+
+    Block 4 cell size :
+        i : 0.023435647 .. 0.023435645
+        j : 0.2 .. 0.2
+        k : 0.0023368179 .. 0.093472715
+
+    Block 5 cell size :
+        i : 0.018989548 .. 0.18989548
+        j : 0.2 .. 0.2
+        k : 0.0023368179 .. 0.093472715
+
+Creating cells
+Creating patches
+No patch pairs to merge
+
+Writing polyMesh with 0 cellZones
+----------------
+Mesh Information
+----------------
+  boundingBox: (-1.7 -0.1 -2) (4 0.1 2)
+  nPoints: 32480
+  nCells: 16000
+  nFaces: 64240
+  nInternalFaces: 31760
+----------------
+Patches
+----------------
+  patch 0 (start: 31760 size: 120) name: aerofoil
+  patch 1 (start: 31880 size: 200) name: inlet
+  patch 2 (start: 32080 size: 160) name: outlet
+  patch 3 (start: 32240 size: 16000) name: back
+  patch 4 (start: 48240 size: 16000) name: front
+
+End
+

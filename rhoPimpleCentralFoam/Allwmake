@@ -1,0 +1,13 @@
+#!/bin/sh
+# Convenience wrapper to build just this solver
+# Load OpenFOAM v2406 if needed
+if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
+    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
+    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    fi
+fi
+# Ensure local bin exists (Make/files points to ../bin)
+# Build
+/Volumes/OpenFOAM-v2406/wmake/wmake

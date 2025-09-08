@@ -1,0 +1,31 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2406                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      turbulenceProperties;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+simulationType          RAS;
+
+RAS
+{
+    // Use the standard SST model for this tutorial
+    // (LDCU transport is already hard-wired in the solver)
+    RASModel            kOmegaSSTLdcu;
+
+    turbulence          on;
+
+    printCoeffs         on;
+}
+
+
+// ************************************************************************* //

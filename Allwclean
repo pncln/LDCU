@@ -1,0 +1,45 @@
+#!/bin/sh
+# Clean local LDCU turbulence library, solver, and tutorial artifacts
+
+set -e
+
+ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Load OpenFOAM v2406 environment if not already loaded
+if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
+    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
+    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    fi
+fi
+
+# Paths to wmake helpers (explicit to avoid PATH issues in sandbox)
+WMAKE_ROOT="/Volumes/OpenFOAM-v2406/wmake"
+WCLEAN="$WMAKE_ROOT/wclean"
+
+echo "Cleaning ldcuTurbulence library…"
+if [ -d "$ROOT_DIR/ldcuTurbulence" ]; then
+    ( cd "$ROOT_DIR/ldcuTurbulence" && "$WCLEAN" libso ) || true
+fi
+
+echo "Cleaning rhoPimpleCentralFoam solver…"
+if [ -d "$ROOT_DIR/rhoPimpleCentralFoam" ]; then
+    ( cd "$ROOT_DIR/rhoPimpleCentralFoam" && "$WCLEAN" ) || true
+fi
+
+echo "Cleaning tutorial(s)…"
+if [ -x "$ROOT_DIR/tutorials/aerifoilLDCU/Allclean" ]; then
+    ( cd "$ROOT_DIR/tutorials/aerifoilLDCU" && ./Allclean ) || true
+fi
+
+# Remove installed artifacts from FOAM_USER_* locations
+echo "Removing installed solver/lib from FOAM_USER directories…"
+if [ -n "$FOAM_USER_APPBIN" ] && [ -d "$FOAM_USER_APPBIN" ]; then
+    rm -f "$FOAM_USER_APPBIN/rhoPimpleCentralFoam" || true
+fi
+if [ -n "$FOAM_USER_LIBBIN" ] && [ -d "$FOAM_USER_LIBBIN" ]; then
+    rm -f "$FOAM_USER_LIBBIN"/libldcuTurbulence.* || true
+fi
+
+echo "All clean."

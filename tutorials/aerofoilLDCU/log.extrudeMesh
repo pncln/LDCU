@@ -1,0 +1,75 @@
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
+Arch   : "LSB;label=32;scalar=64"
+Exec   : extrudeMesh
+Date   : Sep 09 2025
+Time   : 00:25:47
+Host   : Emils-MacBook-Pro.local
+PID    : 3792
+I/O    : uncollated
+Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+--> FOAM Warning : 
+    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
+    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
+    Could not load "libldcuTurbulence"
+dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
+Create mesh for time = 0
+
+Selecting extrudeModel linearDirection
+Selected extrudeModel for linearDirection using coeffs 
+{
+    constructFrom   patch;
+    sourceCase      "<case>";
+    sourcePatches   ( back );
+    exposedPatchName front;
+    extrudeModel    linearDirection;
+    direction       ( 0 -1 0 );
+    thickness       0.1;
+    flipNormals     false;
+    mergeFaces      false;
+}
+
+Extruding from patch using model linearDirection
+Collapsing edges < 0.0001 of bounding box
+
+Extruding patches 1(back) on mesh "/Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU"
+
+--> FOAM Warning : 
+    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
+    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
+    Could not load "libldcuTurbulence"
+dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
+Create mesh for time = 0
+
+Adding overall 0 processor patches.
+Mesh bounding box : (-1.7 -0.1 -2) (4 0 2)
+        with span : (5.7 0.1 4)
+Merge distance    : 1e-05
+
+Collapsing edges < 1e-05 ...
+
+            Uncollapsed edges = 0 / 80720
+    Number of points : 32480
+    Not visited      : 0
+    Not collapsed    : 32480
+    Collapsed        : 0
+
+Collapsing 0 cells
+Writing mesh to "/Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU/constant/region0"
+
+End
+
