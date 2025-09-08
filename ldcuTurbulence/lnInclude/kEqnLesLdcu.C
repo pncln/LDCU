@@ -1,1 +1,0 @@
-../kEqnLesLdcu.C

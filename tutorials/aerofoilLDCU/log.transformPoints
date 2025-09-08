@@ -9,9 +9,9 @@ Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
 Arch   : "LSB;label=32;scalar=64"
 Exec   : transformPoints -scale (1 0 1)
 Date   : Sep 09 2025
-Time   : 00:25:47
+Time   : 01:12:54
 Host   : Emils-MacBook-Pro.local
-PID    : 3791
+PID    : 11127
 I/O    : uncollated
 Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
 nProcs : 1

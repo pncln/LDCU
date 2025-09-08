@@ -1,1 +1,0 @@
-../kOmegaSSTLdcu.C

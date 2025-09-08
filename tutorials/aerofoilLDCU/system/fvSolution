@@ -30,7 +30,37 @@ solvers
         relTol          0;
     }
 
-    "(rho|U|k|omega|e)"
+    // Symmetric matrices (explicit convection): use PCG/DIC or smoothSolver
+    U
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.1;
+    }
+
+    UFinal
+    {
+        $U;
+        relTol          0;
+    }
+
+    e
+    {
+        solver          smoothSolver;
+        smoother        symGaussSeidel;
+        tolerance       1e-6;
+        relTol          0.1;
+    }
+
+    eFinal
+    {
+        $e;
+        relTol          0;
+    }
+
+    // Scalars typically remain asymmetric in turbulence models
+    k
     {
         solver          PBiCGStab;
         preconditioner  DILU;
@@ -38,9 +68,35 @@ solvers
         relTol          0.1;
     }
 
-    "(rho|U|k|omega|e)Final"
+    kFinal
     {
-        $U;
+        $k;
+        relTol          0;
+    }
+
+    omega
+    {
+        solver          PBiCGStab;
+        preconditioner  DILU;
+        tolerance       1e-6;
+        relTol          0.1;
+    }
+
+    omegaFinal
+    {
+        $omega;
+        relTol          0;
+    }
+
+    // Rho often solved diagonally; keep a generic fallback
+    rho
+    {
+        solver          diagonal;
+    }
+
+    rhoFinal
+    {
+        $rho;
         relTol          0;
     }
 }

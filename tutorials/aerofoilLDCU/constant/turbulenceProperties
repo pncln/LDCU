@@ -20,7 +20,7 @@ RAS
 {
     // Use the standard SST model for this tutorial
     // (LDCU transport is already hard-wired in the solver)
-    RASModel            kOmegaSSTLdcu;
+    RASModel            kOmegaSST;
 
     turbulence          on;
 

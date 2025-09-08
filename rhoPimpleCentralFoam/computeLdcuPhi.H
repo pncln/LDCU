@@ -3,6 +3,8 @@
 // by providing an explicit mass flux based on left/right states and
 // local wave speeds. Boundary fluxes fall back to existing phi.
 
+#include <cmath>
+
 // Create phiLDCU by copying topology/boundaries from phi
 surfaceScalarField phiLDCU("phiLDCU", phi);
 // Mass-correction part (alpha* q^rho), integrated [kg/s]
@@ -85,6 +87,8 @@ auto minmod = [](const scalar a, const scalar b) -> scalar
     return (mag(a) < mag(b)) ? a : b;
 };
 
+auto finite = [](const scalar x) -> bool { return std::isfinite(double(x)); };
+
 // Internal face fluxes
 scalarField& phiInt = phiLDCU.primitiveFieldRef();
 
@@ -114,8 +118,20 @@ for (label faceI = 0; faceI < nIntFaces; ++faceI)
     const scalar aL = Foam::sqrt(max(gammaL*pL/rhoL, SMALL));
     const scalar aR = Foam::sqrt(max(gammaR*pR/rhoR, SMALL));
 
-    const scalar sL = min(unL - aL, unR - aR);
-    const scalar sR = max(unL + aL, unR + aR);
+    // Wave speeds (Kurganov), clamped with zero as in reference code
+    const scalar sL = min(min(unL - aL, unR - aR), scalar(0));
+    const scalar sR = max(max(unL + aL, unR + aR), scalar(0));
+
+    const scalar denom = (sR - sL);
+    if (!finite(sL) || !finite(sR) || mag(denom) < SMALL)
+    {
+        // Degenerate wave speeds or bad numerics: fall back to central average
+        const scalar fL = rhoL*unL;
+        const scalar fR = rhoR*unR;
+        phiInt[faceI] = 0.5*(fL + fR) * sArea;
+        // Keep default zeros for corrections and initial interpolated Ustar
+        continue;
+    }
 
     // Left/right mass flux per unit area
     const scalar FL = rhoL*unL;
@@ -133,20 +149,20 @@ for (label faceI = 0; faceI < nIntFaces; ++faceI)
     else
     {
         // Central-upwind baseline flux (Kurganov-Tadmor type)
-        F = (sR*FL - sL*FR + sR*sL*(rhoR - rhoL)) / (sR - sL + VSMALL);
+        F = (sR*FL - sL*FR + sR*sL*(rhoR - rhoL)) / (denom + VSMALL);
 
         // Low-dissipation correction from LDCU (Part II) — density component
         // Star states (1D-normal) based on local wave speeds
         const scalar rhouL = rhoL*unL;
         const scalar rhouR = rhoR*unR;
 
-    const scalar denom = (sR - sL + VSMALL);
-    const scalar rhoStar = (sR*rhoL - sL*rhoR - (rhouL - rhouR)) / denom;
+    const scalar denomV = (denom + VSMALL);
+    const scalar rhoStar = (sR*rhoL - sL*rhoR - (rhouL - rhouR)) / denomV;
 
     // Momentum star (vector) using full vector flux in n-direction
     const vector FmomL = rhoL*UL*unL + pL*nHat;
     const vector FmomR = rhoR*UR*unR + pR*nHat;
-    const vector rhouStarVec = (sR*(rhoL*UL) - sL*(rhoR*UR) - (FmomL - FmomR)) / denom;
+    const vector rhouStarVec = (sR*(rhoL*UL) - sL*(rhoR*UR) - (FmomL - FmomR)) / denomV;
     const scalar rhouStar = rhouStarVec & nHat; // normal component for 1D relations
     const vector Ustar = rhouStarVec / max(rhoStar, VSMALL);
     const scalar uStar = Ustar & nHat;
@@ -232,8 +248,9 @@ for (label faceI = 0; faceI < nIntFaces; ++faceI)
         eCorr.primitiveFieldRef()[faceI] = alphaStar*qE*sArea;
     }
 
-    // Convert to integrated flux (kg/s)
-    phiInt[faceI] = F * sArea;
+    // Convert to integrated flux (kg/s) with final safety
+    const scalar Fint = F * sArea;
+    phiInt[faceI] = finite(Fint) ? Fint : phi.primitiveField()[faceI];
 }
 
 // For boundaries, fall back to the existing mass flux

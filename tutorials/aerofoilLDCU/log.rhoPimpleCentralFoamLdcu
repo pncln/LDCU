@@ -1,0 +1,129 @@
+libldcuTurbulence: registering LDCU RAS/LES models
+/*---------------------------------------------------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  2406                                  |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
+Arch   : "LSB;label=32;scalar=64"
+Exec   : rhoPimpleCentralFoamLdcu
+Date   : Sep 09 2025
+Time   : 01:12:55
+Host   : Emils-MacBook-Pro.local
+PID    : 11133
+I/O    : uncollated
+Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
+nProcs : 1
+trapFpe: Floating point exception trapping enabled (FOAM_SIGFPE).
+fileModificationChecking : Monitoring run-time modified files using timeStampMaster (fileModificationSkew 5, maxFileModificationPolls 20)
+allowSystemOperations : Allowing user-supplied system call operations
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Create time
+
+Create mesh for time = 0
+
+
+PIMPLE: Operating solver in PISO mode
+
+Reading thermophysical properties
+
+Selecting thermodynamics package 
+{
+    type            hePsiThermo;
+    mixture         pureMixture;
+    transport       const;
+    thermo          hConst;
+    equationOfState perfectGas;
+    specie          specie;
+    energy          sensibleInternalEnergy;
+}
+
+Reading field U
+
+Reading/calculating face flux field phi
+
+pressureControl
+    pMax 200000
+    pMin 10000
+
+Creating turbulence model
+
+Selecting turbulence model type RAS
+Selecting RAS turbulence model kOmegaSST
+Selecting patchDistMethod meshWave
+RAS
+{
+    RASModel        kOmegaSST;
+    turbulence      on;
+    printCoeffs     on;
+    alphaK1         0.85;
+    alphaK2         1;
+    alphaOmega1     0.5;
+    alphaOmega2     0.856;
+    gamma1          0.55555556;
+    gamma2          0.44;
+    beta1           0.075;
+    beta2           0.0828;
+    betaStar        0.09;
+    a1              0.31;
+    b1              1;
+    c1              10;
+    F3              false;
+    decayControl    false;
+    kInf            0;
+    omegaInf        0;
+}
+
+Creating field dpdt
+
+Creating field kinetic energy K
+
+No MRF models present
+
+Creating finite volume options from "system/fvOptions"
+
+Selecting finite volume options type limitTemperature
+    Source: limitT
+    - selecting all cells
+    - selected 16000 cell(s) with volume 2.0996568
+Courant Number mean: 0.087474783 max: 1.9441033
+
+Starting time loop
+
+Courant Number (LDCU) mean: 0.087474783 max: 1.9441033
+Time = 2e-05
+
+PIMPLE: iteration 1
+diagonal:  Solving for rho, Initial residual = 0, Final residual = 0, No Iterations 0
+smoothSolver:  Solving for Ux, Initial residual = 1, Final residual = 3.3771817e-10, No Iterations 2
+smoothSolver:  Solving for Uz, Initial residual = 1, Final residual = 5.1717264e-11, No Iterations 2
+smoothSolver:  Solving for e, Initial residual = 1, Final residual = 8.2924334e-10, No Iterations 2
+limitTemperature=limitT, Type=Lower, LimitedCells=20, CellsPercent=0.13, Tmin=101, UnlimitedTmin=298
+limitTemperature=limitT, Type=Upper, LimitedCells=14, CellsPercent=0.09, Tmax=1000, UnlimitedTmax=298
+GAMG:  Solving for p, Initial residual = 1, Final residual = 0.0013351009, No Iterations 3
+GAMG:  Solving for p, Initial residual = 0.00098661538, Final residual = 7.9846624e-06, No Iterations 2
+diagonal:  Solving for rho, Initial residual = 0, Final residual = 0, No Iterations 0
+time step continuity errors : sum local = 2.3780668e-08, global = 2.1311808e-09, cumulative = 2.1311808e-09
+GAMG:  Solving for p, Initial residual = 0.014934755, Final residual = 6.0254771e-05, No Iterations 2
+GAMG:  Solving for p, Initial residual = 0.00018836711, Final residual = 2.1842766e-07, No Iterations 3
+diagonal:  Solving for rho, Initial residual = 0, Final residual = 0, No Iterations 0
+time step continuity errors : sum local = 6.2973329e-10, global = 5.3499499e-12, cumulative = 2.1365308e-09
+DILUPBiCGStab:  Solving for omega, Initial residual = 0.0018458949, Final residual = 3.6524438e-08, No Iterations 1
+DILUPBiCGStab:  Solving for k, Initial residual = 1, Final residual = 2.2418734e-08, No Iterations 2
+ExecutionTime = 0.1 s  ClockTime = 0 s
+
+Courant Number (LDCU) mean: 0.088727049 max: 31.627121
+Time = 4e-05
+
+PIMPLE: iteration 1
+diagonal:  Solving for rho, Initial residual = 0, Final residual = 0, No Iterations 0
+[stack trace]
+=============
+#1  Foam::sigFpe::sigHandler(int) in /Volumes/OpenFOAM-v2406/platforms/darwin64ClangDPInt32Opt/lib/libOpenFOAM.dylib
+#2  _sigtramp in /usr/lib/system/libsystem_platform.dylib
+#3  main in ~/OpenFOAM/pncln-v2406/platforms/darwin64ClangDPInt32Opt/bin/rhoPimpleCentralFoamLdcu
+#4  start in /usr/lib/dyld
+=============
