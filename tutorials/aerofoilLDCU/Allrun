@@ -17,6 +17,8 @@ runApplication transformPoints -scale '(1 0 1)'
 
 runApplication extrudeMesh
 
-runApplication $(getApplication)
+runApplication decomposePar
+
+runApplication mpirun -n 10 $(getApplication) > log &
 
 #------------------------------------------------------------------------------

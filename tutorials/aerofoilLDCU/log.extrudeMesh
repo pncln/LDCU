@@ -8,10 +8,10 @@
 Build  : _630d60de3b-20240620 OPENFOAM=2406 version=v2406
 Arch   : "LSB;label=32;scalar=64"
 Exec   : extrudeMesh
-Date   : Sep 09 2025
-Time   : 01:12:55
+Date   : Sep 10 2025
+Time   : 17:26:16
 Host   : Emils-MacBook-Pro.local
-PID    : 11129
+PID    : 56623
 I/O    : uncollated
 Case   : /Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU
 nProcs : 1
@@ -22,11 +22,6 @@ allowSystemOperations : Allowing user-supplied system call operations
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 Create time
 
---> FOAM Warning : 
-    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
-    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
-    Could not load "libldcuTurbulence"
-dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
 Create mesh for time = 0
 
 Selecting extrudeModel linearDirection
@@ -48,11 +43,6 @@ Collapsing edges < 0.0001 of bounding box
 
 Extruding patches 1(back) on mesh "/Users/pncln/Documents/Code/Projects/LDCU/tutorials/aerofoilLDCU"
 
---> FOAM Warning : 
-    From void *Foam::dlLibraryTable::openLibrary(const fileName &, bool)
-    in file db/dynamicLibrary/dlLibraryTable/dlLibraryTable.C at line 188
-    Could not load "libldcuTurbulence"
-dlopen(libldcuTurbulence.dylib, 0x0009): symbol not found in flat namespace '__ZN4Foam13laminarModels6StokesINS_18ThermalDiffusivityINS_27CompressibleTurbulenceModelINS_11fluidThermoEEEEEE8typeNameE'
 Create mesh for time = 0
 
 Adding overall 0 processor patches.

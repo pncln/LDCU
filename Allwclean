@@ -5,32 +5,37 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Load OpenFOAM v2406 environment if not already loaded
+# Load OpenFOAM environment if not already loaded
 if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
-    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
-        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
-    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
-        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    if [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
+    elif [ -f /opt/OpenFOAM/OpenFOAM-v2406/etc/bashrc ]; then
+        . /opt/OpenFOAM/OpenFOAM-v2406/etc/bashrc
+    elif [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc
     fi
 fi
 
-# Paths to wmake helpers (explicit to avoid PATH issues in sandbox)
-WMAKE_ROOT="/Volumes/OpenFOAM-v2406/wmake"
-WCLEAN="$WMAKE_ROOT/wclean"
+# Resolve wclean
+if [ -n "$WM_PROJECT_DIR" ] && [ -x "$WM_PROJECT_DIR/wmake/wclean" ]; then
+    WCLEAN="$WM_PROJECT_DIR/wmake/wclean"
+else
+    WCLEAN="$(command -v wclean || true)"
+fi
 
 echo "Cleaning ldcuTurbulence library…"
-if [ -d "$ROOT_DIR/ldcuTurbulence" ]; then
+if [ -d "$ROOT_DIR/ldcuTurbulence" ] && [ -n "$WCLEAN" ]; then
     ( cd "$ROOT_DIR/ldcuTurbulence" && "$WCLEAN" libso ) || true
 fi
 
 echo "Cleaning rhoPimpleCentralFoam solver…"
-if [ -d "$ROOT_DIR/rhoPimpleCentralFoam" ]; then
+if [ -d "$ROOT_DIR/rhoPimpleCentralFoam" ] && [ -n "$WCLEAN" ]; then
     ( cd "$ROOT_DIR/rhoPimpleCentralFoam" && "$WCLEAN" ) || true
 fi
 
 echo "Cleaning tutorial(s)…"
-if [ -x "$ROOT_DIR/tutorials/aerifoilLDCU/Allclean" ]; then
-    ( cd "$ROOT_DIR/tutorials/aerifoilLDCU" && ./Allclean ) || true
+if [ -x "$ROOT_DIR/tutorials/aerofoilLDCU/Allclean" ]; then
+    ( cd "$ROOT_DIR/tutorials/aerofoilLDCU" && ./Allclean ) || true
 fi
 
 # Remove installed artifacts from FOAM_USER_* locations

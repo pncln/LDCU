@@ -21,7 +21,8 @@ ddtSchemes
 
 gradSchemes
 {
-    default         Gauss linear;
+    // More accurate, robust default gradient
+    default         leastSquares;
 
     limited         cellLimited Gauss linear 1;
     grad(U)         $limited;
@@ -33,31 +34,32 @@ divSchemes
 {
     default         none;
 
-    div(phi,U)      Gauss linearUpwind limited;
+    // Use bounded, TVD second-order convection
+    div(phi,U)              bounded Gauss limitedLinearV 1;
 
     // LDCU flux-based convection (used by the custom solver)
     // Mirror the same schemes as for standard phi
-    div(phiLDCU,U)      Gauss linearUpwind limited;
+    div(phiLDCU,U)          bounded Gauss limitedLinearV 1;
     // Turbulence model uses the flux passed at construction (phiTurb)
     // Provide matching entries for that name as well
-    div(phiTurb,U)      Gauss linearUpwind limited;
+    div(phiTurb,U)          bounded Gauss limitedLinearV 1;
 
-    energy          Gauss linearUpwind limited;
-    div(phi,e)      $energy;
-    div(phi,K)      $energy;
-    div(phi,Ekp)    $energy;
-    div(phiLDCU,e)      $energy;
-    div(phiLDCU,K)      $energy;
-    div(phiTurb,e)      $energy;
-    div(phiTurb,K)      $energy;
+    energy                  bounded Gauss limitedLinear 1;
+    div(phi,e)              $energy;
+    div(phi,K)              $energy;
+    div(phi,Ekp)            $energy;
+    div(phiLDCU,e)          $energy;
+    div(phiLDCU,K)          $energy;
+    div(phiTurb,e)          $energy;
+    div(phiTurb,K)          $energy;
 
-    turbulence      Gauss linearUpwind limited;
-    div(phi,k)      $turbulence;
-    div(phi,omega)  $turbulence;
-    div(phiLDCU,k)      $turbulence;
-    div(phiLDCU,omega)  $turbulence;
-    div(phiTurb,k)      $turbulence;
-    div(phiTurb,omega)  $turbulence;
+    turbulence              bounded Gauss limitedLinear 1;
+    div(phi,k)              $turbulence;
+    div(phi,omega)          $turbulence;
+    div(phiLDCU,k)          $turbulence;
+    div(phiLDCU,omega)      $turbulence;
+    div(phiTurb,k)          $turbulence;
+    div(phiTurb,omega)      $turbulence;
 
     div(phiv,p)     Gauss upwind;
     div((phi|interpolate(rho)),p) Gauss upwind;

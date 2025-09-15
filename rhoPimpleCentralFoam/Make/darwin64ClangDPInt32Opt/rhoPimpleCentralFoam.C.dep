@@ -956,6 +956,7 @@ $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/rhoEqn.H \
 UEqn.H \
 EEqn.H \
 pcEqn.H \
+rhoEqnLdcu.H \
 $(WM_PROJECT_DIR)/src/finiteVolume/lnInclude/compressibleContinuityErrs.H \
 pEqn.H \
 

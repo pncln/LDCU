@@ -99,7 +99,7 @@ else
     }
 }
 
-#include "rhoEqn.H"
+#include "rhoEqnLdcu.H"
 #include "compressibleContinuityErrs.H"
 
 // Explicitly relax pressure for momentum corrector
@@ -115,7 +115,7 @@ if (pressureControl.limit(p))
     p.correctBoundaryConditions();
 }
 
-thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
+thermo.correctRho(psi*p - psip0);
 rho = thermo.rho();
 
 // Correct rhoUf if the mesh is moving

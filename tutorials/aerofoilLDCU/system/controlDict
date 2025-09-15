@@ -24,14 +24,14 @@ stopAt          endTime;
 
 endTime         0.15;
 
-deltaT          1e-9;
+deltaT          1e-8;
 adjustTimeStep  true;
 maxCo           0.5;
 maxDeltaT       1e-7;
 
 writeControl    adjustable;
 
-writeInterval   0.001;
+writeInterval   1e-5;
 
 purgeWrite      10;
 
@@ -46,9 +46,6 @@ timeFormat      general;
 timePrecision   6;
 
 runTimeModifiable true;
-
-// Load custom LDCU turbulence models
-libs ("libldcuTurbulence");
 
 functions
 {

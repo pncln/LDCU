@@ -99,9 +99,9 @@ if (pressureControl.limit(p))
     p.correctBoundaryConditions();
 }
 
-thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
+thermo.correctRho(psi*p - psip0);
 
-#include "rhoEqn.H"
+#include "rhoEqnLdcu.H"
 #include "compressibleContinuityErrs.H"
 
 rho = thermo.rho();

@@ -1,0 +1,25 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2012 (or your version)               |
+|   \\  /    A nd           | Web:      www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
+
+// Number of subdomains (must match the number of MPI processes you will run)
+numberOfSubdomains  10;
+
+// Method: simple | hierarchical | scotch | metis | manual
+method          scotch;
+
+// For 'simple' or 'hierarchical' methods you need coefficients
+// Here’s an example for 'simple':
+simpleCoeffs

@@ -1,27 +1,35 @@
 #!/bin/sh
+set -e
+
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-# Build local LDCU turbulence library
-cd "$ROOT_DIR/ldcuTurbulence" || exit 1
-# Load OpenFOAM v2406 environment if not already loaded
+
+# Load OpenFOAM environment if not already loaded
 if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
-    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
-        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
-    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
-        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
+    if [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
+        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc"
+    elif [ -f /opt/OpenFOAM/OpenFOAM-v2406/etc/bashrc ]; then
+        . /opt/OpenFOAM/OpenFOAM-v2406/etc/bashrc
+    elif [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
+        . /Volumes/OpenFOAM-v2406/etc/bashrc
     fi
 fi
-/Volumes/OpenFOAM-v2406/wmake/wmake libso
+
+# Resolve wmake/wclean
+if [ -n "$WM_PROJECT_DIR" ] && [ -x "$WM_PROJECT_DIR/wmake/wmake" ]; then
+    WMAKE="$WM_PROJECT_DIR/wmake/wmake"
+else
+    WMAKE="$(command -v wmake || true)"
+fi
+
+if [ -z "$WMAKE" ]; then
+    echo "Error: wmake not found; source your OpenFOAM env (WM_PROJECT_DIR)." >&2
+    exit 1
+fi
+
+# Build local LDCU turbulence library
+cd "$ROOT_DIR/ldcuTurbulence"
+"$WMAKE" libso
 
 # Build local rhoPimpleCentralFoam
-cd "$ROOT_DIR/rhoPimpleCentralFoam" || exit 1
-# Ensure local bin exists
-# Load OpenFOAM v2406 environment if not already loaded
-if [ -z "$WM_PROJECT_DIR" ] || [ ! -d "$WM_PROJECT_DIR" ]; then
-    if [ -f /Volumes/OpenFOAM-v2406/etc/bashrc ]; then
-        . /Volumes/OpenFOAM-v2406/etc/bashrc || exit 1
-    elif [ -f "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" ]; then
-        . "$HOME/OpenFOAM/OpenFOAM-v2406/etc/bashrc" || exit 1
-    fi
-fi
-# Compile
-/Volumes/OpenFOAM-v2406/wmake/wmake
+cd "$ROOT_DIR/rhoPimpleCentralFoam"
+"$WMAKE"
